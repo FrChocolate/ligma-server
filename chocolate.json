@@ -1,0 +1,19 @@
+{
+  "info": {
+    "fork": "native",
+    "createdUnix": 1751101239,
+    "name": "ligma"
+  },
+  "requirements": [],
+  "startupEnv": [],
+  "privateEnv": [],
+  "exclude": [],
+  "mainFile": "app.py",
+  "flagsString": "",
+  "environmentVariables": {},
+  "actionsScript": {},
+  "sshHost": null,
+  "sshUsername": null,
+  "sshPassword": null,
+  "sshPort": null
+}

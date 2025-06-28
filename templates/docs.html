@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat App API Documentation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown-dark.min.css">
+  <style>
+    body {
+      background-color: #0e1117;
+      font-family: system-ui, sans-serif;
+      color: #c9d1d9;
+      padding: 2em;
+    }
+    .markdown-body {
+      background-color: #161b22;
+      padding: 2em;
+      border-radius: 10px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 0 0.75rem rgba(0, 0, 0, 0.5);
+    }
+    pre {
+      background-color: #0d1117 !important;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 1em;
+      overflow-x: auto;
+    }
+    code {
+      font-family: monospace;
+      color: #c9d1d9;
+    }
+    a {
+      color: #58a6ff;
+    }
+    h1, h2, h3 {
+      color: #e6edf3;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 0.3em;
+    }
+    blockquote {
+      border-left: 4px solid #30363d;
+      padding-left: 1em;
+      color: #8b949e;
+    }
+    ul {
+      padding-left: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <article class="markdown-body">
+    <h1>Chat App Backend API Documentation</h1>
+    <blockquote><strong>Base URL:</strong> <code>http://localhost:5000</code></blockquote>
+
+    <h2>Authentication and User Management</h2>
+
+    <h3>POST /new</h3>
+    <p>Register a new user.</p>
+    <strong>Request JSON:</strong>
+    <pre><code>{
+  "nick": "username",
+  "password": "password"
+}</code></pre>
+    <strong>Responses:</strong>
+    <ul>
+      <li>200 OK: <code>{ "uuid": "..." }</code></li>
+      <li>400: Missing fields</li>
+      <li>409: User already exists</li>
+    </ul>
+
+    <h3>POST /login</h3>
+    <p>Log in an existing user.</p>
+    <pre><code>{
+  "nick": "username",
+  "password": "password"
+}</code></pre>
+    <ul>
+      <li>200 OK: <code>{ "uuid": "..." }</code></li>
+      <li>400: Missing fields</li>
+      <li>403: Invalid credentials</li>
+    </ul>
+
+    <h3>GET /me/&lt;uuid&gt;</h3>
+    <p>Get the nickname of a user session.</p>
+    <pre><code>{
+  "nick": "username"
+}</code></pre>
+
+    <h2>Chatroom Management</h2>
+
+    <h3>POST /create_chat</h3>
+    <p>Create a new chatroom.</p>
+    <pre><code>{
+  "uuid": "user-session-id",
+  "chatname": "room-name"
+}</code></pre>
+
+    <h3>POST /join</h3>
+    <p>Join an existing chatroom.</p>
+    <pre><code>{
+  "uuid": "user-session-id",
+  "chatname": "room-name"
+}</code></pre>
+
+    <h3>GET /chats</h3>
+    <p>List all chatrooms.</p>
+    <pre><code>[
+  "chat1",
+  "chat2",
+  "lounge"
+]</code></pre>
+
+    <h2>Messaging</h2>
+
+    <h3>POST /send</h3>
+    <p>Send a message to a chatroom.</p>
+    <pre><code>{
+  "uuid": "user-session-id",
+  "chat": "room-name",
+  "msg": "Hello world!"
+}</code></pre>
+
+    <h3>GET /get</h3>
+    <p>Get the last 40 messages from a chatroom.</p>
+    <p><strong>Query parameter:</strong> <code>?chat=room-name</code></p>
+    <pre><code>[
+  {
+    "sender": "alice",
+    "msg": "Hi there!",
+    "time": "Fri Jun 28 18:42:12 2025"
+  }
+]</code></pre>
+
+    <h2>Example Workflow</h2>
+    <pre><code>POST /new
+{ "nick": "alice", "password": "1234" }
+
+POST /create_chat
+{ "uuid": "abc123", "chatname": "lounge" }
+
+POST /send
+{ "uuid": "abc123", "chat": "lounge", "msg": "hello!" }
+
+GET /get?chat=lounge</code></pre>
+  </article>
+</body>
+</html>
