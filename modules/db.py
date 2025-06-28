@@ -83,6 +83,10 @@ class AsyncChatDB:
         async with self.pool.acquire() as conn:
             return await conn.fetchrow("SELECT * FROM chats WHERE chatname = $1", chatname)
 
+    async def get_chat_by_id(self, chatid: int) -> Optional[asyncpg.Record]:
+        async with self.pool.acquire() as conn:
+            return await conn.fetchrow("SELECT * FROM chats WHERE id = $1", chatid)
+
     async def update_chat_info(self, chat_id: int, **kwargs) -> None:
         """
         kwargs can include: chat_title, chat_about, owner
@@ -162,6 +166,20 @@ class AsyncChatDB:
                 """,
                 user_id
             )
+    
+    async def is_joined(self, chat_id: int, user_id: int) -> bool:
+        async with self.pool.acquire() as conn:
+            result = await conn.fetchval(
+                """
+                SELECT EXISTS (
+                    SELECT 1 FROM dialogs
+                    WHERE chat_id = $1 AND user_id = $2
+                )
+                """,
+                chat_id, user_id
+            )
+            return result
+
 
     async def get_chat_users(self, chat_id: int) -> List[asyncpg.Record]:
         async with self.pool.acquire() as conn:
@@ -173,3 +191,52 @@ class AsyncChatDB:
                 """,
                 chat_id
             )
+    
+    async def send_message(self, chat_id: int, sender_id: int, content: str,
+                           reply_to: Optional[int] = None, is_media: bool = False) -> int:
+        async with self.pool.acquire() as conn:
+            result = await conn.fetchrow(
+                """
+                INSERT INTO messages(chat_id, sender_id, content, reply_to, is_media)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id
+                """,
+                chat_id, sender_id, content, reply_to, is_media
+            )
+            return result["id"]
+
+    async def get_last_messages(self, chat_id: int, offset: int = 0, count: int = 20) -> List[asyncpg.Record]:
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                """
+                SELECT * FROM messages
+                WHERE chat_id = $1
+                ORDER BY sent_at DESC
+                OFFSET $2 LIMIT $3
+                """,
+                chat_id, offset, count
+            )
+
+    async def delete_message(self, message_id: int, user_id: int) -> bool:
+        async with self.pool.acquire() as conn:
+            # Ensure only sender can delete
+            result = await conn.execute(
+                """
+                DELETE FROM messages
+                WHERE id = $1 AND sender_id = $2
+                """,
+                message_id, user_id
+            )
+            return result.endswith("1")  # e.g., 'DELETE 1'
+
+    async def edit_message(self, message_id: int, user_id: int, new_content: str) -> bool:
+        async with self.pool.acquire() as conn:
+            result = await conn.execute(
+                """
+                UPDATE messages
+                SET content = $1, edited_at = CURRENT_TIMESTAMP
+                WHERE id = $2 AND sender_id = $3
+                """,
+                new_content, message_id, user_id
+            )
+            return result.endswith("1")
