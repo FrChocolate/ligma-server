@@ -1,2 +1,5 @@
 log
 db.db
+venv
+__pycache__
+assets

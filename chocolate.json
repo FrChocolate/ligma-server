@@ -4,14 +4,26 @@
     "createdUnix": 1751101239,
     "name": "ligma"
   },
-  "requirements": [],
+  "requirements": [
+    "flask",
+    "redis",
+    "fastapi",
+    "pydantic",
+    "asyncpg",
+    "uvicorn"
+  ],
   "startupEnv": [],
   "privateEnv": [],
   "exclude": [],
   "mainFile": "app.py",
   "flagsString": "",
-  "environmentVariables": {},
-  "actionsScript": {},
+  "environmentVariables": {
+    "PQ_DSN": "postgresql://admin:admin@localhost:5432/ligma2",
+    "REDIS_PORT": "6379"
+  },
+  "actionsScript": {
+    "frun": "./venv/bin/uvicorn app:app --reload"
+  },
   "sshHost": null,
   "sshUsername": null,
   "sshPassword": null,
